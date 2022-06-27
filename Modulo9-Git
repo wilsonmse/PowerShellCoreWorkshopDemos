@@ -4,8 +4,26 @@
 git clone https://github.com/wilsonmse/PowerShellCoreWorkshopDemos.git c:\gitroot\powershellCoreWorkshopDemos
 
 
-##### SLIDE 
+##### SLIDE 57 - PUSH / PULL
 c:
 cd gitroot\powershellcoreworkshopdemos
+
 git pull 
+
+
+git push
+
+
+git commit
+
+
+git fetche
+
+
+git merge origin/next
+
+
+
+git reset
+
 
