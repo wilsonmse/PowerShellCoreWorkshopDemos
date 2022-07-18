@@ -111,6 +111,7 @@ function get-circunferencia {
 }
 
 get-circunferencia -raio 2
+
 1..50 | foreach-object {write-host "A circunferencia de raio $_ = $(get-circunferencia -raio $_)"}
 
 function New-Senha {
