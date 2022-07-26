@@ -3,7 +3,7 @@ function get-largestfiles {
     param (
         [string]$path,
         [int]$listtop=10,
-        [int]$minimumsizeMB=100 # only looks for files larger than n MBbytes
+        [int]$minimumsizeKB=100 # only looks for files larger than n MBbytes
     )
     begin {
         if(Test-Path $path)
@@ -16,7 +16,7 @@ function get-largestfiles {
         }
     }
     process {
-        $largerfiles = Get-ChildItem -path $rootfolder -File -Recurse | where-object {$_.Length -ge $minimumsizeMBMB} | select-object Name, DirectoryName,Length | Sort-Object -top $listtop Length -Descending       
+        $largerfiles = Get-ChildItem -path $rootfolder -File -Recurse | where-object {$_.Length -ge $minimumsizeKBKB} | select-object Name, DirectoryName,Length | Sort-Object -top $listtop Length -Descending       
     
     }  
     end {
@@ -25,12 +25,17 @@ function get-largestfiles {
 }
 
 #get all partitions in computer
-$partitions = Get-partition  | Select-Object DriveLetter
+get-largestfiles -path c:\temp -listtop 5 -minimumsizekB 1
+
+
+
+$partitions = Get-partition | where-object {$_.DriveLetter -match "\w" } | Select-Object DriveLetter 
 
 
 foreach ($partition in $partitions)
 {
-    $arrayoflargestfiles = get-largestfiles -path "$partition`:\" -listtop 20 -minimumsizeMB 100
+    $partition.DriveLetter
+    $arrayoflargestfiles = get-largestfiles -path "$($partition.DriveLetter)`:\" -listtop 20 -minimumsizeKB 100
 }
 
 #show Largest files from all partitions

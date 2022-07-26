@@ -11,13 +11,6 @@ invoke-command -ComputerName windc -Credential $credential -ScriptBlock { $a= 12
 invoke-command -ComputerName windc -Credential $credential -ScriptBlock { $a;$b } 
 
 
-
-
-
-
-
-
-
 #SLIDE 28 - DEMO 3 - Variables while remoting using Powershell
 
 $session =New-PSSession -ComputerName windc -Credential $credential

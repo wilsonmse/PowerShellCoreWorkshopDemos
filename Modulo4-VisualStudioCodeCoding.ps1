@@ -10,10 +10,9 @@ Get-
 #Let intellisense help finding parameters for the command
 get-process -name pwsh
 
-Get-LocalUser
+Get-LocalUser 
 
 Get-service -name a* | Where-Object {$_.status -eq "running"}
-
 
 
 # SLIDE 25 - DEMO 2 - Key Mapping in VSC

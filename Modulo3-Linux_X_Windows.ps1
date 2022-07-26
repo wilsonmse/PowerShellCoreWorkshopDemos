@@ -7,7 +7,7 @@ What we know about objects:
     Combines similar information and capabilities into one entity
     A collection of parts and how to use them
 #>
-$object_variable = Get-Process -name pwsh
+$object_variable = Get-Process -name Notepad | Select-Object *
 $object_variable2 = Get-ChildItem -Path C:\temp\Events.txt
 $object_variable3 = Get-LocalUser -Name workshopdemo
 
@@ -17,7 +17,7 @@ $object_variable2.GetType()
 $object_variable3.GetType()
 
 #discover object members
-get-member -InputObject $object_variable
+get-member -InputObject $object_variable | format-list
 get-member -InputObject $object_variable2
 get-member -InputObject $object_variable3
 
@@ -29,7 +29,7 @@ $object_variable2.Directory
 $object_variable3.PasswordLastSet
 
 #accessing Method Members of an object
-$object_variable.Kill()
+$object_variable.kill()
 
 
 
@@ -39,6 +39,7 @@ $object_variable.Kill()
 #show how all commandlets follow the verb-noun pattern
 
 get-help Get-Command
+get-member
 
 Get-command -verb get
 
@@ -51,14 +52,15 @@ get-command -parameterName *computer*
 
 
 
+
 ##### SLIDE 31 - DEMO 3 - Mapping to PS Commandlets
 
 ## demo alias and command lookup precedence
 
 get-alias
 
-ping 8.8.8.8
-Test-Connection 8.8.8.8
+$pingresult = ping 8.8.8.8
+$tc = Test-Connection 8.8.8.8
 
 new-alias -Name ping -Value Test-Connection
 Remove-Alias -name ping
@@ -84,7 +86,27 @@ wsl.exe
 #Open Powershell
 pwsh
 
-
+#show this commands
+Get-ChildItem
+Test-Connection 8.8.8.8
+Get-Content
+Get-Help
+Clear-Host
+Copy-Item
+Move-Item
+Remove-Item
+Rename-Item
+Pop-Location
+Push-Location
+Set-Location
+Write-Output
+Get-Process
+Tee-Object
+Get-Command
+Stop-Process
+Select-String
+Get-Location
+Get-Alias
 
 
 # SLIDE 45 - DEMO 5 - Review Differences of Text vs object-oriented editors
@@ -106,7 +128,8 @@ $filetxt2.gettype()
 
 
 
-Get-Content c:\temp\File.txt –tail 3
+Get-Content c:\temp\File.txt –Tail 3
+Get-Content c:\temp\File.txt -Tail 3
 
 Get-Content c:\temp\File.txt –Wait
 

@@ -3,10 +3,20 @@
 
 Get-Help
 
+update-help
+
+
+get-process | select-object name, handles | convertto-json | out-file c:\temp\proc.json
+
+code c:\temp\proc.json
+
+
 get-process
 
 
+Get-ChildItem c:\temp | select-object name, Length, LastWriteTime | sort-object LastWriteTime -Descending | export-csv c:\temp\files.csv -Append
 
+code C:\temp\files.csv
 
 
 
@@ -19,17 +29,27 @@ Get-Command
 
 get-command -noun process
 
-Get-command -verb show
+Get-command -verb export
 
 get-command -ParameterName computername
 
 get-command -ParameterName servicename
 
-get-process -name powershell
+get-process -name pwsh 
 
+get-process -Name Notepad | stop-process -Confirm
+
+notepad.exe
 Get-NetAdapter
 
 Get-ComputerInfo | select-object CsManufacturer, CsSystemFamily, CsProcessors, CsTotalPhysicalMemory,OSName
+
+Get-command -module CimCmdlets
+get-help -name Get-CimSession 
+
+get-process winword -ErrorAction Stop
+
+
 
 
 
@@ -59,8 +79,8 @@ Get-date
 #array of objects
 get-process
 (get-process).GetType()
-
-(get-process -name powershell).GetType()
+notepad.exe
+(get-process -name Notepad).GetType()
 
 ([math]::PI).gettype()
 
@@ -91,6 +111,8 @@ $date.AddYears(100)
 
 ## DEMO Function Snippets
 
+
+
 function get-circunferencia {
     [CmdletBinding()]
     param (
@@ -114,7 +136,14 @@ get-circunferencia -raio 2
 
 1..50 | foreach-object {write-host "A circunferencia de raio $_ = $(get-circunferencia -raio $_)"}
 
+$a= get-date
+
+$a.DayOfWeek
+
+"Hoje é $($a.dayofweek)"
+
 function New-Senha {
+    #requires -version 5.1
     [CmdletBinding()]
     param (
         [int]$comprimento,
@@ -122,10 +151,11 @@ function New-Senha {
         )
     
     begin {
-        Add-Type -AssemblyName 'System.Web'
+
     }
     
     process {
+        Add-Type -AssemblyName 'System.Web'
         $password = [System.Web.Security.Membership]::GeneratePassword($comprimento, $nonAlphaChars)
     }
     
@@ -135,6 +165,12 @@ function New-Senha {
 }
 new-senha -comprimento 10 -NonAlphaChars 5
 new-senha -comprimento 65 -NonAlphaChars 20
+
+
+Get-ExecutionPolicy -list
+get-command -Noun ExecutionPolicy
+
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 
 
@@ -151,7 +187,7 @@ get-process -Name msedge*
 
 get-process -Name msedge* | get-member
 
-get-process -Name msedge* | Where-Object {$_.cpu -gt 1000}
+get-process -Name msedge* | Where-Object {$_.cpu -gt 10}
 
 get-process -Name msedge* | Where-Object {$_.handles -gt 1000}
 
@@ -167,4 +203,4 @@ get-process -Name msedge* | Where-Object {$_.WS -gt 1000}  | Sort-Object CPU -De
 
 Get-ChildItem -Path C:\temp
 
-Get-ChildItem -Path C:\temp | foreach-object {write-host "removing item $_.name"; remove-item $_.Name}  
+Get-ChildItem -Path C:\temp | foreach-object {write-host "removing item $_.name"; remove-item $_.Name -WhatIf}  
