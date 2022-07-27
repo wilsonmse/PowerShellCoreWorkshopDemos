@@ -9,3 +9,9 @@ c:
 cd gitroot\powershellcoreworkshopdemos
 git pull 
 
+git add Modulo9-Git.sh
+
+
+git status
+
+git commit -m "update on module 9"
