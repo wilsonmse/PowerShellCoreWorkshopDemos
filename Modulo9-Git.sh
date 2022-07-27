@@ -5,12 +5,16 @@ git init MyNewRepository
 
 
 ### SLIDE 41 - Cloning
-git clone https://github.com/wilsonmse/PowerShellCoreWorkshopDemos.git c:\gitroot\powershellCoreWorkshopDemos
+c:
+cd gitroot
+git clone https://github.com/wilsonmse/WorkshopDemo.git
 
 
 ### SLIDE 57 - PUSH / PULL
 c:
-cd gitroot\powershellcoreworkshopdemos
+cd gitroot\workshopdemo
+
+
 
 git add .
 git add .\file.txt
@@ -46,3 +50,59 @@ git reset
 
 ### SLIDE 79 - BRANCHING / MERGING
 
+
+
+
+
+
+################
+
+Create New – git init <<RepositoryName>>
+git init MyNewRepository
+
+Clone from another location
+git clone https://github.com/anwaterh/MyNewRepository.git
+
+Add a file to staging area
+git add .\script.txt
+
+git status
+
+
+Remove a file from staging (won’t be part of the commit)
+
+git rm .\script.txt –cached
+
+
+Commit all changes – git commit –m “<<commit message>>”
+git commit –m “Altered commit” --amend
+
+
+git log
+
+git log --oneline
+
+
+Git clone
+
+
+
+
+
+git status
+
+Add a new branch – git branch <<branch name>> 
+
+git branch dev
+git checkout dev
+
+Create and switch to – git checkout –b <<branchname>>
+git checkout –b dev
+
+View all local branches – 
+git branch
+
+View local and remote branches
+git branch --all
+
+git merge

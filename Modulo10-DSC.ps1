@@ -6,7 +6,7 @@
 Get-DscResource
 
 #find dsc resources using find-dscresource
-Find-DscResource
+Find-DscResource -ModuleName CommonTasks
 
 #verify if name parameter accepts wildcard
 get-help Find-DSCResource -Parameter name
@@ -48,8 +48,8 @@ Ubuntu Server 14.04 LTS, 16.04 LTS, 18.04 LTS, and 20.04 LTS (x64)
 
 
 #>
-#SSH Versions
-openssh version
+#SSL Versions
+openssl version
 
 # Check if OMI is installed
 sudo apt list --installed | grep omi 
@@ -103,8 +103,6 @@ Get-AzSubscription | select-object name, state
 
 # SLIDE 67 - DEMO 07 - AZURE STORAGE BLOB
 
-
-
 Set-AzVMDscExtension -ResourceGroupName $resourcegroupname -VMName $vmname -
 
 
@@ -115,18 +113,19 @@ Set-AzVMDscExtension -ResourceGroupName $resourcegroupname -VMName $vmname -
 
 
 $credential = get-credential
-$resourcegroupname = "WorkshopPowerShellCore_RG22"
+$resourcegroupname = "WorkshopPowerShellCore_RG"
 
 $locationobject = Get-AzLocation | select Location, DisplayName, PhysicalLocation, GeographyGroup, Latitude, Longitude | Out-GridView -PassThru
 $location = $locationobject.location
 $rg = New-AzResourceGroup -Name $resourcegroupname  -Location $location
 
 
-$vmname = "workshopdemo001"
+#Limit the vmname up to 15 characters
+$vmname = "workshopdemo02"
 
 #Step 2: Create Azure Storage Account
 
-$stgaccount = New-AzStorageAccount -ResourceGroupName $resourcegroupname -Name stgworkshopdemo20220725 -SkuName  Standard_LRS -Kind StorageV2 -Location $location
+$stgaccount = New-AzStorageAccount -ResourceGroupName $resourcegroupname -Name stgworkshopdemo20220728b -SkuName  Standard_LRS -Kind StorageV2 -Location $location
 
 $azdiskconfig = new-azdiskconfig -SkuName StandardSSD_LRS -DiskSizeGB 128 -OsType Windows -Location $location -CreateOption Empty 
 
@@ -179,7 +178,7 @@ $nic = New-AzNetworkInterface -Name $NetAdapterName -ResourceGroupName ($resourc
 
 Get-AzVMImagePublisher -location eastus  | where-object {$_.PublisherName -like '*Microsoft*'} | select-object PublisherName, location 
 $Publisher = Get-AzVMImagePublisher -location eastus  | where-object {$_.PublisherName -eq 'MicrosoftWindowsServer'}  
-$Publisher = Get-AzVMImagePublisher -location eastus  | Out-GridView -PassThru
+#$Publisher = Get-AzVMImagePublisher -location eastus  | Out-GridView -PassThru
 Get-AzVMImageOffer -publishername $Publisher.PublisherName -Location $location
 $vmimageoffer = Get-AzVMImageOffer -publishername $Publisher.PublisherName -Location $location | where-object {$_.Offer -eq 'WindowsServer'}
 Get-AzVMImageSku -Location $location -PublisherName ($Publisher.PublisherName) -Offer ($vmimageoffer.Offer)
@@ -263,124 +262,3 @@ $DSCExtension = @{
 } 
 
 Set-AzVMDSCExtension @DSCExtension
-
-
-Get-AzVMDscExtension
-
-
-
-############# LAB Steps
-#region EXERCISE 1
-## TASK 1 - DOWNLOAD PRE-REQUISITE MODULES
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Install-Module ComputerManagementDSC -Force
-
-############## CONFIGURATION FILE ################################################### 
-Configuration WindowsWebConfig {
-    Param($DomainJoinCredential,$ComputerName)
-    Import-DscResource -ModuleName ComputerManagementDSC,PSDesiredStateConfiguration
-    Node $ComputerName {    
-        Computer DomainJoin {
-            Name = $ComputerName
-            DomainName = 'contoso.com'
-            Credential = $DomainJoinCredential
-        }
-        WindowsFeature WebServer {
-            Ensure = "Present"
-            Name = "Web-Server"
-            DependsOn = '[Computer]DomainJoin'
-        }     
-        File WebSiteFiles {
-            Ensure = "Present"
-            DestinationPath = "C:\inetpub\wwwroot"
-            SourcePath = "C:\Temp\index.html"
-            DependsOn = '[WindowsFeature]WebServer'
-        }   
-    }
-}
-$ConfigurationData = @{
-    AllNodes = @(
-        @{
-            NodeName = "*"
-            PSDscAllowPlainTextPassword = $true
-            PSDscAllowDomainUser = $true
-        },
-        @{
-            NodeName = "WINWEB"
-        }
-    )
-}
-$Credential = Get-Credential
-WindowsWebConfig -ComputerName WINWEB -DomainJoinCredential $Credential -ConfigurationData $ConfigurationData
-
-########### END OF CONFIGURATION FILE ##############################
-
-
-##TASK2 - APPLY THE CONFIGURATION
-
-<####Now apply the configuration to the Windows server, WINWEB. In order to connect to the web server which is un-trusted,
- you must add its' IP address to the trusted hosts setting for PowerShell WinRM. 
- Type the code below into a Windows PowerShell console which is running as an administrator.#>
-
-Set-Item WSMan:\localhost\Client\TrustedHosts -Value 10.0.0.4 -Force
-
-#### Using Visual Studio Code terminal, create a remote session to the WINWEB machine as below:
-$Credential = Get-Credential
-
-#### Use the username Administrator and password PowerShell7 when prompted.
-$session = New-PSSession -ComputerName 10.0.0.4 -Credential $Credential
-
-#### Copy the DSC resource to the new web server machine by using the code below:
-Copy-Item 'C:\Program Files\WindowsPowerShell\Modules\ComputerManagementDsc' -Destination "C:\Program Files\WindowsPowerShell\Modules\" -Recurse -Force -ToSession $session -Verbose
-
-#### Copy the website files to the remote machine in a temp directory:
-
-Invoke-Command -Session $session -ScriptBlock {New-Item C:\Temp -ItemType Directory}
-Copy-Item 'C:\Scripts\Module11\index.html' -Destination C:\Temp\index.html -Force -ToSession $Session -Verbose###
-
-#### Create a new script, with the code below, and press CTRL + F5 to generate a configuration for the server.
-[DscLocalConfigurationManager()]
-Configuration LCMSetting {
-    Param($ComputerName)
-    Node $ComputerName {
-        Settings {
-            RebootNodeIfNeeded = $true
-        }
-    }
-}
-
-LCMSetting -ComputerName 10.0.0.4
-
-##### Create a remote CIM session to the machine and apply the Local Configuration Manager settings. If prompted for credentials, use Contoso/administrator with password of PowerShell7
-
-$CIMSession = New-CIMSession -ComputerName 10.0.0.4 -Credential $Credential
-Set-DscLocalConfigurationManager -Path .\LCMSetting -CimSession $CIMSession -Verbose
-
-#### Apply the configuration and monitor the verbose output.
-
-Rename-Item '.\WindowsWebConfig\WINWEB.mof' '10.0.0.4.mof'
-Start-DscConfiguration -Path .\WindowsWebConfig -CimSession $CIMSession -Verbose -Wait
-
-#### Test that the web server is active by browsing to http://10.0.0.4.
-
-############## END OF EXERCISE 1
-
-
-
-
-#EXERCISE 2
-##TASK 1 - iNSTALL DSC AGENT ON LINUX
-wget https://github.com/Microsoft/omi/releases/download/v1.1.0-0/omi-1.1.0.ssl_100.x64.deb
-
-wget https://github.com/Microsoft/PowerShell-DSC-for-Linux/releases/download/v1.1.1-294/dsc-1.1.1-294.ssl_100.x64.deb
-
-sudo dpkg -i omi-1.1.0.ssl_100.x64.deb dsc-1.1.1-294.ssl_100.x64.deb
-
-###TASK2 - CREATE THE CONFIGURATION
-
-########## LINUX CONFIGURATION FILE ##################
-Configuration LinuxWebConfig {
-    Node $ComputerName {            
-    }
-}
-
